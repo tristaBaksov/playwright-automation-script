@@ -3,3 +3,4 @@ TEST_TASK_v2.pdf
 .venv/
 __pycache__/
 video/
+svg-cursor/

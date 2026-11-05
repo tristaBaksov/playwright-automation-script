@@ -4,7 +4,6 @@ from playwright.sync_api import sync_playwright
 
 cursor_init = """
 (() => {
-    // Создаём элемент курсора
     const cursor = document.createElement('div');
     cursor.id = "playwright-cursor";
     cursor.style.position = 'fixed';
@@ -12,23 +11,39 @@ cursor_init = """
     cursor.style.zIndex = '1000'; 
     cursor.style.transition = 'transform 0.1s ease';
 
-    // Добавляем элемент курсора в body
+    const highlight = document.createElement('div');
+    highlight.id = "playwright-highlight";
+    highlight.style.position = 'fixed';
+    highlight.style.left = '-100px';
+    highlight.style.top = '-100px';
+    highlight.style.width = '64px';
+    highlight.style.height = '64px';
+    highlight.style.borderRadius = '50%';
+    highlight.style.backgroundColor = 'rgba(255, 230, 0.45, 0.45)';
+    highlight.style.transform = 'translate(-50%, -50%)';
+    highlight.style.pointerEvents = 'none';
+    highlight.style.zIndex = '998';
+    
     cursor.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/>
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95.49-7.43-2.99-6.93-6.93.49-3.95 3.95-7.43 7.93-6.93C17.43 5.57 20.91 9.05 20.41 13c-.49 3.95-3.95 7.43-7.93 6.93Z12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c4.42 0 8-3.58 8-8s-3.58-8-8-8zm1 11h-2v-6h2v6z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 6.4 20 20" style="display:block">
+    <path fill="#ffffff" d="M6.56 25.48c-0.32 0-0.64-0.2-0.76-0.52l-1.8-4.28-2.84 1.12c-0.24 0.12-0.56 0.080-0.8-0.080s-0.36-0.4-0.36-0.68v-13.68c0-0.32 0.2-0.64 0.52-0.76s0.68-0.040 0.92 0.2l9.68 9.68c0.2 0.2 0.28 0.48 0.24 0.76s-0.24 0.52-0.48 0.6l-2.8 1.2 1.76 4.28c0.16 0.44-0.040 0.92-0.44 1.080l-2.48 1.040c-0.16 0.040-0.24 0.040-0.36 0.040z"/>
+    <path fill="#000000" d="M6.56 25.48c-0.32 0-0.64-0.2-0.76-0.52l-1.8-4.28-2.84 1.12c-0.24 0.12-0.56 0.080-0.8-0.080s-0.36-0.4-0.36-0.68v-13.68c0-0.32 0.2-0.64 0.52-0.76s0.68-0.040 0.92 0.2l9.68 9.68c0.2 0.2 0.28 0.48 0.24 0.76s-0.24 0.52-0.48 0.6l-2.8 1.2 1.76 4.28c0.16 0.44-0.040 0.92-0.44 1.080l-2.48 1.040c-0.16 0.040-0.24 0.040-0.36 0.040zM4.48 18.76c0.32 0 0.64 0.2 0.76 0.52l1.76 4.28 0.92-0.4-1.76-4.28c-0.16-0.44 0.040-0.92 0.44-1.080l2.44-1.040-7.36-7.36v10.44l2.48-1c0.080-0.040 0.2-0.080 0.32-0.080z"/>
+    </svg>
     `;
 
     document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(cursor);
+        document.body.appendChild(highlight);
     });
 
     // Слушаем движение мыши и двигаем SVG
     document.addEventListener('mousemove', (event) => {
         cursor.style.left = event.clientX + 'px';
         cursor.style.top = event.clientY + 'px';
+        highlight.style.left = event.clientX + 'px';
+        highlight.style.top = event.clientY + 'px';
     });
 
-    // Эффект клик-рипла
     document.addEventListener('click', (event) => {
         const ripple = document.createElement('div');
         ripple.style.position = 'fixed';
@@ -50,8 +65,47 @@ cursor_init = """
 
         setTimeout(() => ripple.remove(), 400);
     });
+
+    window.ShowCallout = (text, bgColor = '#ffee00', textColor = '#000000', fade = true) => {
+        const fadeMs = fade ? 2000 : 0;
+        const holdMs = 1500;
+
+        const callout = document.createElement('div');
+        callout.textContent = text;
+        callout.style.position = 'fixed';
+        callout.style.left = '50%';
+        callout.style.top = '80px';
+        callout.style.transform = 'translateX(-50%)';
+        callout.style.width = 'max-content';
+        callout.style.maxWidth = '90vw';
+        callout.style.padding = '10px 22px';
+        callout.style.background = bgColor;
+        callout.style.color = textColor;
+        callout.style.font = '16pt Arial, sans-serif';
+        callout.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+        callout.style.pointerEvents = 'none';
+        callout.style.zIndex = '2147483644';
+        callout.style.opacity = fade ? '0' : '1';
+        callout.style.transition = `opacity ${fadeMs}ms ease`;
+        document.body.appendChild(callout);
+
+        return new Promise((resolve) => {
+            callout.getBoundingClientRect();
+            callout.style.opacity = '1';
+
+            setTimeout(() => {
+                callout.style.opacity = '0';
+                setTimeout(() => {
+                    callout.remove();
+                    resolve();
+                }, fadeMs);
+            }, fadeMs + holdMs);
+        });
+    }
 })();
 """
+
+PATH_TO_VIDEO_FOLDER = "./video"
 
 def CaptureVideo_Magento(
         url: str,
@@ -63,61 +117,72 @@ def CaptureVideo_Magento(
         street: str,
         house_no: str
 ):
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        
-        video_dir = os.environ.get('PATH_TO_VIDEO_DIR', './video')
-
-        context = browser.new_context(
-            record_video_dir=video_dir,
-            record_video_size={"width": 1280, "height": 720}
-        )
-
-        context.add_init_script(cursor_init)
-        
-        page = context.new_page()
-
-        page.goto(url)
-        page.mouse.move(200, 200)
-
-        search_box = page.locator("textarea[name='q']")
-        search_box.wait_for()
-
-        box = search_box.bounding_box()
-        if box:
-            center_x = box["x"] + box["width"] / 2
-            center_y = box["y"] + box["height"] / 2
-            page.mouse.move(center_x, center_y, steps=150)
-
-        time.sleep(.9)
-        search_box.click()
-        time.sleep(.5)
-        search_box.press_sequentially(f"Magento developer in {city}", delay=120)
-
-        search_button = page.locator("button[type='button']").first
-        search_button.wait_for()
-
-        btn_box = search_button.bounding_box()
-        if btn_box:
-            center_x = btn_box["x"] + btn_box["width"] / 2
-            center_y = btn_box["y"] + btn_box["height"] / 2
-            page.mouse.move(center_x, center_y, steps=165)
-            time.sleep(.8)
-            search_button.click()
-            search_box.press("Enter")
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False)
             
+            with browser.new_context(
+                record_video_dir=PATH_TO_VIDEO_FOLDER,
+                record_video_size={"width": 1280, "height": 720}
+            ) as context:
 
-        page.wait_for_selector('a[data-testid="result-title-a"]', timeout=15000)
+                context.add_init_script(cursor_init)
+                
+                page = context.new_page()
 
-        first_result = page.locator('a[data-testid="result-title-a"]').first
-        first_result.wait_for()
+                video = page.video
 
-        res_box = first_result.bounding_box()
-        if res_box:
-            center_x = res_box["x"] + res_box["width"] / 2
-            center_y = res_box["y"] + res_box["height"] / 2
-            page.mouse.move(center_x, center_y, steps=145)
-            time.sleep(1.2)
-            first_result.click()
+                page.goto(url)
+                page.mouse.move(200, 200)
 
-        time.sleep(5)
+                search_box = page.locator("textarea[name='q']")
+                search_box.wait_for()
+                page.evaluate("text => window.ShowCallout(text)", "Test text")
+
+                box = search_box.bounding_box()
+                if box:
+                    center_x = box["x"] + box["width"] / 2
+                    center_y = box["y"] + box["height"] / 2
+                    page.mouse.move(center_x, center_y, steps=150)
+
+                time.sleep(.9)
+                search_box.click()
+                time.sleep(.5)
+                search_box.press_sequentially(f"Magento developer in {city}", delay=120)
+
+                mode_toggle = page.locator("button[role='radio'][aria-checked='true']")
+                mode_toggle.wait_for(state="visible")
+
+                toggle_box = mode_toggle.bounding_box()
+                if toggle_box:
+                    center_x = toggle_box["x"] + toggle_box["width"] / 2
+                    center_y = toggle_box["y"] + toggle_box["height"] / 2
+                    page.mouse.move(center_x, center_y, steps=165)
+                    page.wait_for_timeout(800)
+                    mode_toggle.click(delay=300)
+                    search_box.press("Enter")
+                    
+
+                page.wait_for_selector('a[data-testid="result-title-a"]', timeout=15000)
+
+                first_result = page.locator('a[data-testid="result-title-a"]').first
+                first_result.wait_for()
+
+                res_box = first_result.bounding_box()
+                if res_box:
+                    center_x = res_box["x"] + res_box["width"] / 2
+                    center_y = res_box["y"] + res_box["height"] / 2
+                    page.mouse.move(center_x, center_y, steps=145)
+                    time.sleep(1.2)
+                    first_result.click()
+
+                time.sleep(5)
+
+            target = os.path.join(PATH_TO_VIDEO_FOLDER, f"{company_name}.webm")
+            os.replace(video.path(), target)
+            browser.close()
+            return os.path.abspath(target)           
+
+    except Exception as e:
+        print(f"Error for {company_name}: {e}")
+        return None 
