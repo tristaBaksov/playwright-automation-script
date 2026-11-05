@@ -1,2 +1,5 @@
 TEST_TASK_v2.pdf
-.venv
+*.webm
+.venv/
+__pycache__/
+video/

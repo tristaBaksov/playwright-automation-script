@@ -1,12 +1,15 @@
 import csv
-from qscript.py import CaptureVideo_Magento
+from qscript import CaptureVideo_Magento
 
-with open('input.csv', 'r') as csvfile:
-    csv_reaader = csv.reader(csvfile)
+with open('input.csv', 'r', encoding='utf-8') as csvfile:
+    csv_reader = csv.reader(csvfile, delimiter=';')
 
-    next(csv.reader)
+    next(csv_reader)
 
-    for row in csv_reaader:
+    for row in csv_reader:
+        if not row:
+            continue
+            
         url = row[0]
         company_name = row[1]
         language = row[2]
