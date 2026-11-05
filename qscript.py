@@ -89,10 +89,11 @@ def CaptureVideo_Magento(
             center_y = box["y"] + box["height"] / 2
             page.mouse.move(center_x, center_y, steps=150)
 
+        time.sleep(.9)
         search_box.click()
+        time.sleep(.5)
         search_box.press_sequentially(f"Magento developer in {city}", delay=120)
 
-        # Добавлено .first, чтобы избежать Strict Mode Violation
         search_button = page.locator("button[type='button']").first
         search_button.wait_for()
 
@@ -101,9 +102,10 @@ def CaptureVideo_Magento(
             center_x = btn_box["x"] + btn_box["width"] / 2
             center_y = btn_box["y"] + btn_box["height"] / 2
             page.mouse.move(center_x, center_y, steps=165)
-            time.sleep(1.1)
-            page.keyboard.press("Enter")
+            time.sleep(.8)
             search_button.click()
+            search_box.press("Enter")
+            
 
         page.wait_for_selector('a[data-testid="result-title-a"]', timeout=15000)
 
@@ -118,4 +120,4 @@ def CaptureVideo_Magento(
             time.sleep(1.2)
             first_result.click()
 
-        time.sleep(3)
+        time.sleep(5)
