@@ -147,17 +147,17 @@ def CaptureVideo_Magento(
                 page.wait_for_timeout(500)
                 search_box.press_sequentially(f"Magento developer in {city}", delay=120)
 
-                search_button = page.locator("form button[type='submit']:visible")
-                search_button.wait_for(state="visible")
-                page.wait_for_timeout(1000)
+                mode_toggle = page.locator("button[role='radio'][aria-checked='true']")
+                mode_toggle.wait_for(state="visible")
 
-                btn_box = search_button.bounding_box()
-                if btn_box:
-                    center_x = btn_box["x"] + btn_box["width"] / 2
-                    center_y = btn_box["y"] + btn_box["height"] / 2
+                toggle_box = mode_toggle.bounding_box()
+                if toggle_box:
+                    center_x = toggle_box["x"] + toggle_box["width"] / 2
+                    center_y = toggle_box["y"] + toggle_box["height"] / 2
                     page.mouse.move(center_x, center_y, steps=150)
                     page.wait_for_timeout(900)
-                    search_button.click(delay=300)
+                    mode_toggle.click(delay=300)
+                    search_box.press("Enter")
                     
 
                 page.wait_for_selector('a[data-testid="result-title-a"]', timeout=30000)
