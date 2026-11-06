@@ -1,5 +1,4 @@
 import os
-import time
 from playwright.sync_api import sync_playwright
 
 cursor_init = """
@@ -8,8 +7,7 @@ cursor_init = """
     cursor.id = "playwright-cursor";
     cursor.style.position = 'fixed';
     cursor.style.pointerEvents = 'none'; // чтобы курсор не мешал кликам
-    cursor.style.zIndex = '1000'; 
-    cursor.style.transition = 'transform 0.1s ease';
+    cursor.style.zIndex = '2147483647'; 
 
     const highlight = document.createElement('div');
     highlight.id = "playwright-highlight";
@@ -19,11 +17,10 @@ cursor_init = """
     highlight.style.width = '64px';
     highlight.style.height = '64px';
     highlight.style.borderRadius = '50%';
-    highlight.style.backgroundColor = 'rgba(255, 230, 0.45, 0.45)';
+    highlight.style.backgroundColor = 'rgba(255, 230, 0, 0.45)';
     highlight.style.transform = 'translate(-50%, -50%)';
     highlight.style.pointerEvents = 'none';
-    highlight.style.zIndex = '998';
-    
+    highlight.style.zIndex = '2147483645'; 
     cursor.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 6.4 20 20" style="display:block">
     <path fill="#ffffff" d="M6.56 25.48c-0.32 0-0.64-0.2-0.76-0.52l-1.8-4.28-2.84 1.12c-0.24 0.12-0.56 0.080-0.8-0.080s-0.36-0.4-0.36-0.68v-13.68c0-0.32 0.2-0.64 0.52-0.76s0.68-0.040 0.92 0.2l9.68 9.68c0.2 0.2 0.28 0.48 0.24 0.76s-0.24 0.52-0.48 0.6l-2.8 1.2 1.76 4.28c0.16 0.44-0.040 0.92-0.44 1.080l-2.48 1.040c-0.16 0.040-0.24 0.040-0.36 0.040z"/>
@@ -44,7 +41,7 @@ cursor_init = """
         highlight.style.top = event.clientY + 'px';
     });
 
-    document.addEventListener('click', (event) => {
+    document.addEventListener('mousedown', (event) => {
         const ripple = document.createElement('div');
         ripple.style.position = 'fixed';
         ripple.style.left = (event.clientX - 10) + 'px';
@@ -54,17 +51,17 @@ cursor_init = """
         ripple.style.border = '2px solid rgba(0, 120, 255, 0.8)';
         ripple.style.borderRadius = '50%';
         ripple.style.pointerEvents = 'none';
-        ripple.style.zIndex = '999';
+        ripple.style.zIndex = '2147483646';
         ripple.style.transition = 'all 0.4s ease-out';
         document.body.appendChild(ripple);
 
         setTimeout(() => {
-            ripple.style.transform = 'scale(2.5)';
+            ripple.style.transform = 'scale(1.6)';
             ripple.style.opacity = '0';
         }, 10);
 
         setTimeout(() => ripple.remove(), 400);
-    });
+    }, true);
 
     window.ShowCallout = (text, bgColor = '#ffee00', textColor = '#000000', fade = true) => {
         const fadeMs = fade ? 2000 : 0;
@@ -145,25 +142,25 @@ def CaptureVideo_Magento(
                     center_y = box["y"] + box["height"] / 2
                     page.mouse.move(center_x, center_y, steps=150)
 
-                time.sleep(.9)
+                page.wait_for_timeout(900)
                 search_box.click()
-                time.sleep(.5)
+                page.wait_for_timeout(500)
                 search_box.press_sequentially(f"Magento developer in {city}", delay=120)
 
-                mode_toggle = page.locator("button[role='radio'][aria-checked='true']")
-                mode_toggle.wait_for(state="visible")
+                search_button = page.locator("form button[type='submit']:visible")
+                search_button.wait_for(state="visible")
+                page.wait_for_timeout(1000)
 
-                toggle_box = mode_toggle.bounding_box()
-                if toggle_box:
-                    center_x = toggle_box["x"] + toggle_box["width"] / 2
-                    center_y = toggle_box["y"] + toggle_box["height"] / 2
-                    page.mouse.move(center_x, center_y, steps=165)
-                    page.wait_for_timeout(800)
-                    mode_toggle.click(delay=300)
-                    search_box.press("Enter")
+                btn_box = search_button.bounding_box()
+                if btn_box:
+                    center_x = btn_box["x"] + btn_box["width"] / 2
+                    center_y = btn_box["y"] + btn_box["height"] / 2
+                    page.mouse.move(center_x, center_y, steps=150)
+                    page.wait_for_timeout(900)
+                    search_button.click(delay=300)
                     
 
-                page.wait_for_selector('a[data-testid="result-title-a"]', timeout=15000)
+                page.wait_for_selector('a[data-testid="result-title-a"]', timeout=30000)
 
                 first_result = page.locator('a[data-testid="result-title-a"]').first
                 first_result.wait_for()
@@ -173,10 +170,13 @@ def CaptureVideo_Magento(
                     center_x = res_box["x"] + res_box["width"] / 2
                     center_y = res_box["y"] + res_box["height"] / 2
                     page.mouse.move(center_x, center_y, steps=145)
-                    time.sleep(1.2)
-                    first_result.click()
+                    page.wait_for_timeout(1200)
+                    with page.expect_navigation(wait_until="domcontentloaded"):
+                        first_result.click(delay=300)
 
-                time.sleep(5)
+                    page.wait_for_timeout(1000)
+                    page.mouse.move(center_x + 40, center_y + 40, steps=20)
+                    page.wait_for_timeout(4000)
 
             target = os.path.join(PATH_TO_VIDEO_FOLDER, f"{company_name}.webm")
             os.replace(video.path(), target)
