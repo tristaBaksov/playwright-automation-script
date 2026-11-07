@@ -1,6 +1,10 @@
-TEST_TASK_v2.pdf
+TEST_TASK*
 *.webm
 .venv/
 __pycache__/
 video/
 svg-cursor/
+uploads/
+*.db
+*.db-wal
+*.db-shm
